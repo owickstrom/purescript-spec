@@ -3,13 +3,11 @@ module Test.Spec.Reporter.Tap (tapReporter) where
 import Prelude
 
 import Control.Monad.State (get, modify_)
-import Data.Either (fromRight)
 import Data.Maybe (Maybe(..))
 import Data.String (Pattern(Pattern), joinWith, split)
-import Data.String.Regex (regex)
 import Data.String.Regex as Regex
+import Data.String.Regex.Unsafe (unsafeRegex)
 import Effect.Exception as Error
-import Partial.Unsafe (unsafePartial)
 import Test.Spec.Console (tellLn)
 import Test.Spec.Reporter.Base (defaultReporter)
 import Test.Spec.Result (Result(..))
@@ -49,12 +47,12 @@ tapReporter = defaultReporter 1 case _ of
 
 -- create a TAP-safe title
 escMsg :: String -> String
-escMsg =
-  let rex = unsafePartial $ fromRight $ regex "^" $ Regex.parseFlags "gm"
-    in Regex.replace rex "  "
+escMsg = Regex.replace rex "  "
+  where
+  rex = unsafeRegex "^" $ Regex.parseFlags "gm"
 
 -- create a TAP-safe error msg
 escTitle :: String -> String
-escTitle =
-  let rex = unsafePartial $ fromRight $ regex "#" $ Regex.parseFlags "g"
-    in Regex.replace rex ""
+escTitle = Regex.replace rex ""
+  where
+  rex = unsafeRegex "#" $ Regex.parseFlags "g"
